@@ -1,0 +1,63 @@
+<div id="video-container" style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;">
+    <iframe id="vimeo-player" src="https://player.vimeo.com/video/753533096?h=b4f8ceacc9&autopause=0&muted=1&controls=1&background=0&autoplay=1" frameborder="0" allow="autoplay; fullscreen; picture-in-picture; volume" style="position:absolute;top:0;left:0;width:100%;height:100%;" title="Video 1"></iframe>
+</div>
+
+<script src="https://player.vimeo.com/api/player.js"></script>
+
+<script>
+    // Listen over videoer (Vimeo videolenker)
+    var videoLinks = [
+        'https://player.vimeo.com/video/753533096?h=b4f8ceacc9&autoplay=1',  // Første video
+        'https://player.vimeo.com/video/917955360?h=708a811b3f&autoplay=1'   // Andre video
+    ];
+
+    var currentVideoIndex = 0;
+    var iframe = document.getElementById('vimeo-player');
+    var player = new Vimeo.Player(iframe);
+
+    // Funksjon for å bytte til neste video ved å endre src-attributtet til iframe
+    function changeVideo(videoIndex) {
+        if (videoIndex < videoLinks.length) {
+            iframe.src = videoLinks[videoIndex];  // Start neste video
+        } else {
+            document.getElementById('video-container').innerHTML = "<p>Alle videoer har blitt spilt av.</p>";  // Vis melding når alle videoer er spilt
+        }
+    }
+
+    // Når første video er ferdig, gå til neste video
+    player.on('ended', function() {
+        currentVideoIndex++;
+        if (currentVideoIndex < videoLinks.length) {
+            changeVideo(currentVideoIndex);  // Start neste video
+        } else {
+            document.getElementById('video-container').innerHTML = "<p>Alle videoer har blitt spilt av.</p>";  // Vis melding når alle videoer er ferdige
+        }
+    });
+
+    // Deaktiver pausefunksjonen - Når brukeren prøver å pause videoen, spill den av igjen
+    player.on('pause', function() {
+        // Tillat ikke å pause videoen før alle videoene har blitt spilt av
+        if (currentVideoIndex < videoLinks.length) {
+            player.play();  // Hvis videoen pauses, spill den av igjen
+        }
+    });
+
+    // Hindre brukeren i å spole frem eller tilbake
+    let lastTime = 0;
+    player.on('timeupdate', function(event) {
+        lastTime = event.seconds;
+    });
+
+    player.on('seeked', function(event) {
+        player.setCurrentTime(lastTime);  // Gå tilbake til forrige posisjon hvis brukeren prøver å spole
+    });
+
+    // Volumkontroll: Lyd slås på når brukeren klikker eller beveger musen over videoen
+    iframe.addEventListener('mouseover', function() {
+        player.setVolume(1);  // Slå på lyden helt
+    });
+
+    iframe.addEventListener('click', function() {
+        player.setVolume(1);  // Slå på lyden helt når videoen klikkes
+    });
+</script>
